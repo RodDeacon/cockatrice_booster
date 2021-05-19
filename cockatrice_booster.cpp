@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <set>
 #include <algorithm>
 
 // file names
@@ -25,9 +26,9 @@ const int BOOSTER_AMOUNT = 1;
 
 
 // function prototypes
-void create_map(std::map<std::string, std::string> &);
-void create_map(std::map<std::string , std::string> &, std::string, std::string);
-void print_map(std::map<std::string, std::string>);
+void create_map(std::map<std::string, std::set<std::string>> &);
+void create_map(std::map<std::string , std::set<std::string>> &, std::string, std::string);
+void print_map(std::map<std::string, std::set<std::string>>);
 // void create_deck(std::map<std::string, std::string>, std::map<std::string, int> &);
 
 
@@ -35,7 +36,7 @@ void print_map(std::map<std::string, std::string>);
 int main()
 {
 
-    std::map<std::string, std::string> cardList; // make a map of commons, uncommons, rares
+    std::map<std::string, std::set<std::string>> cardList; // make a map of commons, uncommons, rares
 
     create_map(cardList);
     print_map(cardList);
@@ -52,7 +53,7 @@ int main()
 
 
 
-void create_map(std::map<std::string, std::string> &map)
+void create_map(std::map<std::string, std::set<std::string>> &map)
 {
 
     create_map(map, commons,    "commons");
@@ -63,7 +64,7 @@ void create_map(std::map<std::string, std::string> &map)
 
 
 
-void create_map(std::map<std::string, std::string> &map, std::string fName, std::string rarity)
+void create_map(std::map<std::string, std::set<std::string>> &map, std::string fName, std::string rarity)
 {
 
     std::cout << "running second create map" << std::endl;
@@ -87,7 +88,7 @@ void create_map(std::map<std::string, std::string> &map, std::string fName, std:
 
 
 
-void print_map(std::map<std::string, std::string> map)
+void print_map(std::map<std::string, std::set<std::string>> map)
 {
 
     for (auto itr = map.begin(); itr != map.end(); itr++)
