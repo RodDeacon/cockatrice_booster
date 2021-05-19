@@ -7,13 +7,14 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include <set>
 #include <algorithm>
 
 // file names
-const std::string commons   = "stx-commons.dec";
-const std::string uncommons = "stx-uncommons.dec";
-const std::string rares     = "stx-rare-mythics.dec";
-const std::string deck      = "output.dec";
+const std::string COMMONS_FILE      = "stx-commons.dec";
+const std::string UNCOMMONS_FILE    = "stx-uncommons.dec";
+const std::string RARES_FILE        = "stx-rare-mythics.dec";
+const std::string DECK_OUT          = "output.dec";
 
 // amount of cards
 const int cNum = 10;    // commons
@@ -25,9 +26,10 @@ const int BOOSTER_AMOUNT = 1;
 
 
 // function prototypes
-void create_map(std::map<std::string, std::string> &);
-void create_map(std::map<std::string , std::string> &, std::string, std::string);
-void print_map(std::map<std::string, std::string>);
+void create_map(std::map<std::string, std::set<std::string>> &);
+void create_map(std::map<std::string , std::set<std::string>> &, std::string, std::string);
+void print_map(std::map<std::string, std::set<std::string>>);
+void print_map(std::map<std::string, std::set<std::string>>, std::string);
 // void create_deck(std::map<std::string, std::string>, std::map<std::string, int> &);
 
 
@@ -35,7 +37,7 @@ void print_map(std::map<std::string, std::string>);
 int main()
 {
 
-    std::map<std::string, std::string> cardList; // make a map of commons, uncommons, rares
+    std::map<std::string, std::set<std::string>> cardList; // make a map of commons, uncommons, rares
 
     create_map(cardList);
     print_map(cardList);
@@ -52,47 +54,67 @@ int main()
 
 
 
-void create_map(std::map<std::string, std::string> &map)
+void create_map(std::map<std::string, std::set<std::string>> &map)
 {
 
-    create_map(map, commons,    "commons");
-    create_map(map, uncommons,  "uncommons");
-    create_map(map, rares,      "rares");
+    create_map(map, COMMONS_FILE,    "commons");
+    create_map(map, UNCOMMONS_FILE,  "uncommons");
+    create_map(map, RARES_FILE,      "rares");
 
 }
 
 
-
-void create_map(std::map<std::string, std::string> &map, std::string fName, std::string rarity)
+// create a useable map with parameters of the map, file name, and the rarity
+void create_map(std::map<std::string, std::set<std::string>> &map, std::string fName, std::string rarity)
 {
 
-    std::cout << "running second create map" << std::endl;
+    std::ifstream file(fName); // open file
 
-    std::ifstream file(fName);
-
-
-    int x;              // numbers of cards in deck
     std::string y;      // name of the card
 
+    std::set<std::string> set;
 
-    while (std::getline(file, y))
+    while (std::getline(file, y)) // while the file still has lines
     {
 
-        std::cout << "adding " << x << " cards named " << y << "\n" << "rarity: " << rarity << "\n" << std::endl; // debug
-        map.emplace(rarity, y);
+        // parse each line
+        std::string temp = y.substr(2,y.length());
     
+        std::cout << "the card to be added to the set" << temp << std::endl;
+
+
+        // add to set
+        set.insert(temp);
+
     }
+
+    map.insert(std::pair<std::string, std::set<std::string>>(rarity, set)); // insert rarity and the set into the map.
     
 }
 
 
 
-void print_map(std::map<std::string, std::string> map)
+void print_map(std::map<std::string, std::set<std::string>> map)
 {
 
-    for (auto itr = map.begin(); itr != map.end(); itr++)
+    print_map(map, "commons");
+    print_map(map, "uncommons");
+    print_map(map, "rares");
+
+}
+
+
+
+void print_map(std::map<std::string, std::set<std::string>> map, std::string rarity)
+{
+
+    std::set<std::string> tempSet = map[rarity];
+
+    std::cout << rarity << ":" << std::endl;
+
+    for (auto it= tempSet.begin(); it != tempSet.end(); ++it)
     {
-        std::cout << itr->first << itr->second << std::endl;
+        std::cout << *it << std::endl;
     }
 
 }
