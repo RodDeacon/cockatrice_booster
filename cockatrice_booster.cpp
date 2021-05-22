@@ -11,12 +11,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <map>
-#include <set>
+#include <map> // key value pair map<string, set>   <commons, list-of-all-cards>
+#include <set> // a list, but there can only be one of each type 
+#include <vector>
 #include <algorithm>
+
 #include <random>
 #include <chrono>
-#include <vector>
 #include <thread>
 
 // file names
@@ -100,7 +101,7 @@ void create_map(std::map<std::string, std::set<std::string>> &map, std::string f
         // parse each line
         std::string temp = y.substr(2,y.length());
     
-        std::cout << "the card to be added to the set" << temp << std::endl;
+        // std::cout << "the card to be added to the set " << temp << std::endl; // debug 
 
 
         // add to set
@@ -113,7 +114,7 @@ void create_map(std::map<std::string, std::set<std::string>> &map, std::string f
 }
 
 
-
+// print the map for testing purposes
 void print_map(std::map<std::string, std::set<std::string>> map)
 {
 
@@ -124,7 +125,7 @@ void print_map(std::map<std::string, std::set<std::string>> map)
 }
 
 
-
+// helper method to print_map
 void print_map(std::map<std::string, std::set<std::string>> map, std::string rarity)
 {
 
@@ -144,14 +145,15 @@ void print_map(std::map<std::string, std::set<std::string>> map, std::string rar
 //Create a deck file consisting of the correct amount of cards
 void create_booster(std::map<std::string, std::set<std::string>> card_set, std::map<std::string, int> &outputDeck)
 {
-
+    // create vectors to be used by create_booster helper function
     std::vector<std::string> commons = create_vector(card_set["commons"]);
     std::vector<std::string> uncommons = create_vector(card_set["uncommons"]);
     std::vector<std::string> rares = create_vector(card_set["rares"]);
 
-    print_vector(commons, "commons");
-    print_vector(uncommons, "uncommons");
-    print_vector(rares, "rares");
+    // print_vector(commons, "commons");
+    // print_vector(uncommons, "uncommons");
+    // print_vector(rares, "rares");
+
     for (int i = 0; i < BOOSTER_AMOUNT; i++)
     {     
         create_booster(outputDeck, commons, cNum);
@@ -161,13 +163,16 @@ void create_booster(std::map<std::string, std::set<std::string>> card_set, std::
     }
 }
 
+
+
+// helper function for create_booster that does the heavy lifting
 void create_booster(std::map<std::string, int> &outputDeck, std::vector<std::string> rarity, int rarityAmount)
 {
     for (int i = 0; i < rarityAmount; i++)
     {
         
 
-        std::chrono::milliseconds timespan(random_num(5,500)); 
+        std::chrono::milliseconds timespan(random_num(5,150)); 
         std::this_thread::sleep_for(timespan);
 
         int location = random_num(0, rarity.size()); // random location in the card_set
@@ -187,6 +192,9 @@ void create_booster(std::map<std::string, int> &outputDeck, std::vector<std::str
     } 
 }
 
+
+
+
 std::vector<std::string> create_vector(std::set<std::string> set)
 {
     std::vector<std::string> vector;
@@ -199,17 +207,16 @@ std::vector<std::string> create_vector(std::set<std::string> set)
 }
 
 
-
-// choose a random number 
-int random_num(int min, int max)// create a random num
+// create a random num
+int random_num(int min, int max)
 {
-    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();
-    // unsigned seed = std::chrono::steady_clock::now();
-    // std::chrono::system_clock::now().duration
-    std::default_random_engine e(seed);
-    std::uniform_int_distribution<int> dist(0,max);
+    unsigned seed = std::chrono::steady_clock::now().time_since_epoch().count();    // create a seed using steady_clock
 
-    return dist(e); // random num that was generated
+    std::default_random_engine e(seed);                                             // use seed to generate random engine
+
+    std::uniform_int_distribution<int> dist(0,max-1);                               // use uniform integer ditribution to increase uniformity in random number
+
+    return dist(e);                                                                 // random num that was generated
 }
 
 
