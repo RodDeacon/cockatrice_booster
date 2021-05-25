@@ -10,15 +10,14 @@
 */
 #include <iostream>
 #include <fstream>
+#include <random> // used for random number generation
+#include <chrono> // used for random number generation
+#include <thread> // used for random number generation
+#include <map>
 #include <string>
-#include <map> // key value pair map<string, set>   <commons, list-of-all-cards>
-#include <set> // a list, but there can only be one of each type 
 #include <vector>
-#include <algorithm>
 
-#include <random>
-#include <chrono>
-#include <thread>
+// ************************ CONSTANTS ************************ // 
 
 // file names
 const std::string COMMONS_FILE      = "stx-commons.dec";
@@ -35,29 +34,32 @@ const int rNum = 2;     // rares
 const int BOOSTER_AMOUNT = 6;
 
 
-// function prototypes
-void create_map(std::map<std::string, std::set<std::string>> &);
-void create_map(std::map<std::string , std::set<std::string>> &, std::string, std::string);
 
-std::vector<std::string> create_vector(std::set<std::string>);
+// ********************* FUNCTION PROTOTYPES ********************* //
 
-void print_map(std::map<std::string, std::set<std::string>>);
-void print_map(std::map<std::string, std::set<std::string>>, std::string);
+void create_map(std::map<std::string, std::vector<std::string>> &);                                     // create map
+void create_map(std::map<std::string , std::vector<std::string>> &, std::string, std::string);
 
-void print_vector(std::vector<std::string>, std::string);
+void print_map(std::map<std::string, std::vector<std::string>>);                                        // print map
+void print_map(std::map<std::string, std::vector<std::string>>, std::string);
 
-void create_booster(std::map<std::string, std::set<std::string>>, std::map<std::string, int> &);
+void print_vector(std::vector<std::string>, std::string);                                               // print vector
+
+void create_booster(std::map<std::string, std::vector<std::string>>, std::map<std::string, int> &);     // create booster
 void create_booster(std::map<std::string, int> &, std::vector<std::string>, int);
-void output_deck(std::map<std::string, int>);
 
-int random_num(int, int);
+void output_deck(std::map<std::string, int>);                                                           // output dec file
+
+int random_num(int, int);                                                                               // generate random number
 
 
+
+// ************************ MAIN PROGRAM ************************ //
 
 int main()
 {
 
-    std::map<std::string, std::set<std::string>> cardList; // make a map of commons, uncommons, rares
+    std::map<std::string, std::vector<std::string>> cardList; // make a map of commons, uncommons, rares
 
     create_map(cardList);
     print_map(cardList);
@@ -73,9 +75,10 @@ int main()
 
 }
 
+// ********************* FUNCTION DEFINITIONS ********************* //
 
 // creates a map of all the commons, uncommons, and rares to be used by the program.
-void create_map(std::map<std::string, std::set<std::string>> &map)
+void create_map(std::map<std::string, std::vector<std::string>> &map)
 {
 
     create_map(map, COMMONS_FILE,    "commons");
@@ -85,15 +88,16 @@ void create_map(std::map<std::string, std::set<std::string>> &map)
 }
 
 
+
 // create a useable map with parameters of the map, file name, and the rarity
-void create_map(std::map<std::string, std::set<std::string>> &map, std::string fName, std::string rarity)
+void create_map(std::map<std::string, std::vector<std::string>> &map, std::string fName, std::string rarity)
 {
 
     std::ifstream file(fName); // open file
 
     std::string y;      // name of the card
 
-    std::set<std::string> set;
+    std::vector<std::string> vector;
 
     while (std::getline(file, y)) // while the file still has lines
     {
@@ -101,21 +105,22 @@ void create_map(std::map<std::string, std::set<std::string>> &map, std::string f
         // parse each line
         std::string temp = y.substr(2,y.length());
     
-        // std::cout << "the card to be added to the set " << temp << std::endl; // debug 
+        // std::cout << "the card to be added to the vector " << temp << std::endl; // debug 
 
 
-        // add to set
-        set.insert(temp);
+        // add to vector
+        vector.push_back(temp);
 
     }
 
-    map.insert(std::pair<std::string, std::set<std::string>>(rarity, set)); // insert rarity and the set into the map.
+    map.insert(std::pair<std::string, std::vector<std::string>>(rarity, vector)); // insert rarity and the set into the map.
     
 }
 
 
+
 // print the map for testing purposes
-void print_map(std::map<std::string, std::set<std::string>> map)
+void print_map(std::map<std::string, std::vector<std::string>> map)
 {
 
     print_map(map, "commons");
@@ -125,15 +130,16 @@ void print_map(std::map<std::string, std::set<std::string>> map)
 }
 
 
+
 // helper method to print_map
-void print_map(std::map<std::string, std::set<std::string>> map, std::string rarity)
+void print_map(std::map<std::string, std::vector<std::string>> map, std::string rarity)
 {
 
-    std::set<std::string> tempSet = map[rarity];
+    std::vector<std::string> tempVector = map[rarity];
 
     std::cout << rarity << ":" << std::endl;
 
-    for (auto it= tempSet.begin(); it != tempSet.end(); ++it)
+    for (auto it= tempVector.begin(); it != tempVector.end(); ++it)
     {
         std::cout << *it << std::endl;
     }
@@ -143,16 +149,12 @@ void print_map(std::map<std::string, std::set<std::string>> map, std::string rar
 
 
 //Create a deck file consisting of the correct amount of cards
-void create_booster(std::map<std::string, std::set<std::string>> card_set, std::map<std::string, int> &outputDeck)
+void create_booster(std::map<std::string, std::vector<std::string>> card_set, std::map<std::string, int> &outputDeck)
 {
     // create vectors to be used by create_booster helper function
-    std::vector<std::string> commons = create_vector(card_set["commons"]);
-    std::vector<std::string> uncommons = create_vector(card_set["uncommons"]);
-    std::vector<std::string> rares = create_vector(card_set["rares"]);
-
-    // print_vector(commons, "commons");
-    // print_vector(uncommons, "uncommons");
-    // print_vector(rares, "rares");
+    std::vector<std::string> commons = card_set["commons"];
+    std::vector<std::string> uncommons = card_set["uncommons"];
+    std::vector<std::string> rares = card_set["rares"];
 
     for (int i = 0; i < BOOSTER_AMOUNT; i++)
     {     
@@ -168,10 +170,10 @@ void create_booster(std::map<std::string, std::set<std::string>> card_set, std::
 // helper function for create_booster that does the heavy lifting
 void create_booster(std::map<std::string, int> &outputDeck, std::vector<std::string> rarity, int rarityAmount)
 {
+
     for (int i = 0; i < rarityAmount; i++)
     {
-        
-
+    
         std::chrono::milliseconds timespan(random_num(5,150)); 
         std::this_thread::sleep_for(timespan);
 
@@ -181,30 +183,18 @@ void create_booster(std::map<std::string, int> &outputDeck, std::vector<std::str
         std::cout << "the card to be added is " << card << std::endl;
 
         // check if the output deck already contains the specified card
-        if (outputDeck.count(card) > 0) // if the outputDeck already contains this card then 
+        if (outputDeck.count(card) > 0)                                             // if the outputDeck already contains this card then 
         {
-            outputDeck.at(card)++;// increase the value at that key 
-        } else 
+            outputDeck.at(card)++;                                                  // increase the value at that key 
+
+        } else                                                                      // else the outputDeck doesn't contain the card
         {
-            outputDeck[card] = 1;
+            outputDeck[card] = 1;                                                   // assign the card as the key and the value at 1
         }
 
     } 
 }
 
-
-
-
-std::vector<std::string> create_vector(std::set<std::string> set)
-{
-    std::vector<std::string> vector;
-    for (auto it : set)
-    {
-        vector.push_back(it);
-    }
-
-    return vector;
-}
 
 
 // create a random num
@@ -217,8 +207,8 @@ int random_num(int min, int max)
     std::uniform_int_distribution<int> dist(0,max-1);                               // use uniform integer ditribution to increase uniformity in random number
 
     return dist(e);                                                                 // random num that was generated
-}
 
+}
 
 
 
